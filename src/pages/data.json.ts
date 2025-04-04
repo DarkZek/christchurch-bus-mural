@@ -4,7 +4,7 @@ import { cachedVehiclePositions, cachedVehiclePositionsExpiryTimeMs, type BusPos
 
 export async function GET() {
 
-    if (!cachedVehiclePositions.data || cachedVehiclePositions.data.lastUpdated.getTime() > new Date().getTime() + cachedVehiclePositionsExpiryTimeMs) {
+    if (!cachedVehiclePositions.data || cachedVehiclePositions.data.lastUpdated.getTime() + cachedVehiclePositionsExpiryTimeMs < new Date().getTime()) {
         
         const httpResponse = await axios.get(
             'https://apis.metroinfo.co.nz/rti/gtfsrt/v1/vehicle-positions.pb',
@@ -26,7 +26,15 @@ export async function GET() {
             entity: {
                 vehicle: {
                     position: BusPosition
-                }
+                    currentStopSequence: number
+                    currentStatus: "IN_TRANSIT_TO" | "STOPPED_AT"
+                    timestamp: number
+                    stopId: number
+                    vehicle: {
+                        id: string
+                        label: string
+                    },
+                },
             }[]
         }
 
@@ -39,6 +47,8 @@ export async function GET() {
             positions,
             lastUpdated: new Date()
         }
+
+        console.log('Successfully fetched bus data')
     }
 
     return new Response(JSON.stringify(cachedVehiclePositions.data), {

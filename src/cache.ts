@@ -6,7 +6,7 @@ export const cachedVehiclePositions: {
     } | undefined
 } = { data: undefined }
 
-export const cachedVehiclePositionsExpiryTimeMs = 1000*60
+export const cachedVehiclePositionsExpiryTimeMs = 1000*20
 
 export interface BusPosition {
     latitude: number,

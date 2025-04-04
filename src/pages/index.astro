@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets'
 import backgroundImage from '../background/map.webp'
+import BusOverlay from '../components/BusOverlay.vue'
 ---
 
 <html lang="en">
@@ -15,21 +16,32 @@ import backgroundImage from '../background/map.webp'
 		<div
 			class="parent"
 		>
-			<Image
-				src={backgroundImage}
-				alt="Map of Christchurch"
-				class="map"
-			></Image>
+			<div class="map"></div>
+			<BusOverlay
+				client:only
+				class="bus-overlay"
+			/>
 		</div>
 		<style>
 			.parent {
 				display: flex;
 			}
+			.bus-overlay {
+				height: 100vh;
+				width: 100vw;
+				position: absolute;
+			}
 			.map {
 				height: 100vh;
+				aspect-ratio: 4096 / 2865;
+				background-image: url(../background/map.webp), url(../background/map-lowres.webp);
+				background-size: contain;
+				background-position: center;
 			}
 			body {
 				margin: 0px;
+				overflow-y: hidden;
+				background-color: black;
 			}
 		</style>
 	</body>
