@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import BusIcon from './BusIcon.vue'
 import type { cachedVehiclePositionsExpiryTimeMs, BusInfo, BusPosition } from '../bus'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 
 const mapConfig = {
     leftEdgeLongitude: 172.25766667,
@@ -17,13 +17,31 @@ async function loadBusses() {
         const data = await fetch('./data.json')
 
         busses.value = (await data.json()).busses as BusInfo[]
+
+        nextTick(animateBusses)
     } catch (e) {
         alert('Fetching bus information failed. Try again later')
     }
 
-    setTimeout(loadBusses, 5000)
+    setTimeout(loadBusses, 10000)
 }
 loadBusses()
+
+function animateBusses() {
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    for (const [i, bus] of busses.value!.entries()) {
+
+        const directionRadians = (bus.position.bearing + 0) * (Math.PI / 180)
+
+        const x = Math.cos(directionRadians) * bus.position.speed * 0.1
+        const y = Math.sin(directionRadians) * bus.position.speed * 0.1
+
+        document.getElementById(`bus-${i}`)?.animate([
+            { transform: "translate(0, 0)" },
+            { transform: `translate(${x}px, ${y}px)` },
+        ], { duration: 10000, easing: 'linear' })
+    }
+}
 
 // https://stackoverflow.com/questions/2103924/mercator-longitude-and-latitude-calculations-to-x-and-y-on-a-cropped-map-of-the
 function convertGeoToPixel(
@@ -111,6 +129,7 @@ function getStyle(bus: BusInfo, i: number) {
             v-for="bus, i of busses"
             class="bus"
             :style="getStyle(bus, i)"
+            :id="`bus-${i}`"
         >
             <BusIcon 
                 :color="bus.color"
@@ -130,6 +149,7 @@ function getStyle(bus: BusInfo, i: number) {
     transform-origin: center;
     display: flex;
     flex-direction: column;
+    transition: rotate 0.5s ease-in-out;
 
     img {
         width: 100%;

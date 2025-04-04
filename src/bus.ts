@@ -139,7 +139,7 @@ export async function fetchVehicleRoutes() {
     console.log('Successfully fetched route data')
 }
 
-export const cachedVehiclePositionsExpiryTimeMs = 1000*20
+export const cachedVehiclePositionsExpiryTimeMs = 1000*10
 
 export interface BusInfo {
     position: BusPosition
