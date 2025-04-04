@@ -1,5 +1,6 @@
 ---
-
+import { Image } from 'astro:assets'
+import backgroundImage from '../background/map.webp'
 ---
 
 <html lang="en">
@@ -8,9 +9,28 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>Christchurch Bus Mural</title>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<div
+			class="parent"
+		>
+			<Image
+				src={backgroundImage}
+				alt="Map of Christchurch"
+				class="map"
+			></Image>
+		</div>
+		<style>
+			.parent {
+				display: flex;
+			}
+			.map {
+				height: 100vh;
+			}
+			body {
+				margin: 0px;
+			}
+		</style>
 	</body>
 </html>
