@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import BusIcon from './BusIcon.vue'
 import type { cachedVehiclePositionsExpiryTimeMs, BusInfo, BusPosition } from '../bus'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const mapConfig = {
     leftEdgeLongitude: 172.25766667,
@@ -49,8 +49,8 @@ function convertGeoToPixel(
     return {x, y} // the pixel x,y value of this point on the map image
 }
 
-function getStyle(bus: BusInfo) {
-    const relativeBusPosition = convertGeoToPixel(
+const busPixelCoordinates = computed(() => {
+    return busses.value?.map((bus) => convertGeoToPixel(
         bus.position.latitude,
         bus.position.longitude,
         document.documentElement.clientHeight * mapConfig.imageAspectRatio,
@@ -58,7 +58,32 @@ function getStyle(bus: BusInfo) {
         mapConfig.leftEdgeLongitude,
         mapConfig.rightEdgeLongitude,
         mapConfig.bottomEdgeLongitude
-    )
+    ))
+})
+
+function dist(x1: number, y1: number, x2: number, y2: number) {
+    return Math.sqrt((x1-x2)**2 + (y1-y2)**2)
+}
+
+function getStyle(bus: BusInfo, i: number) {
+    
+    // Get how many other busses are close by
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    const busCoordinates = busPixelCoordinates.value![i]
+
+    // Get how many other busses are within 100px and get their average distance
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    const closeBusses = busPixelCoordinates.value!
+        .map((busPos) => dist(busPos.x, busPos.y, busCoordinates.x, busCoordinates.y))
+        .filter((busDist, busIndex) => {
+            if (i === busIndex) return false
+            return busDist < 100
+        })
+
+    // Reduce size of bus as distance decreases
+    let busSize = Math.max(0.5, Math.E ** (-0.05 * closeBusses.length))
+
+    busSize *= 2
 
     let rotation = bus.position.bearing
 
@@ -71,10 +96,10 @@ function getStyle(bus: BusInfo) {
     // }
     
     return {
-        top: `${relativeBusPosition.y - 16}px`, // Offset by 16 to center bus on point
-        left: `${relativeBusPosition.x - 16}px`,
+        top: `${busCoordinates.y - 16}px`, // Offset by 16 to center bus on point
+        left: `${busCoordinates.x - 16}px`,
         rotate: `${rotation + 90}deg`,
-        scale: `${flipped ? -1 : 1} 1`
+        scale: `${flipped ? -busSize : busSize} ${busSize}`
     }
 } 
 
@@ -83,9 +108,9 @@ function getStyle(bus: BusInfo) {
 <template>
     <div>
         <div
-            v-for="bus of busses"
+            v-for="bus, i of busses"
             class="bus"
-            :style="getStyle(bus)"
+            :style="getStyle(bus, i)"
         >
             <BusIcon 
                 :color="bus.color"
