@@ -64,15 +64,16 @@ function getStyle(bus: BusInfo) {
 
     let flipped = false
 
-    if (rotation > 180) {
-        flipped = true
-        rotation -= 180
-    }
+    // TODO: Revisit to make this not flip the text
+    // if (rotation < 180) {
+    //     flipped = true
+    //     rotation -= 180
+    // }
     
     return {
         top: `${relativeBusPosition.y * 1.0}px`,
         left: `${relativeBusPosition.x * 1.0}px`,
-        rotate: `${rotation - 90}deg`,
+        rotate: `${rotation + 90}deg`,
         scale: `${flipped ? -1 : 1} 1`
     }
 } 
@@ -102,7 +103,6 @@ function getStyle(bus: BusInfo) {
     width: 32px;
     height: 32px;
     transform-origin: center;
-    transform: translate(-16px, -16px);
     display: flex;
     flex-direction: column;
 
