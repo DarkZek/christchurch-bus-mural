@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "@astrojs/vue": "^5.0.9",
+    "adm-zip": "^0.5.16",
     "astro": "^5.6.0",
     "axios": "^1.8.4",
     "protobufjs": "^7.4.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
     "sass-embedded": "^1.86.3"
   }
 }

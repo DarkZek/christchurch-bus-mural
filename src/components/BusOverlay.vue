@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import busImage from '../img/bus.svg'
-import { cachedVehiclePositionsExpiryTimeMs, type BusPosition } from '../cache'
+import BusIcon from './BusIcon.vue'
+import type { cachedVehiclePositionsExpiryTimeMs, BusInfo, BusPosition } from '../bus'
 import { ref } from 'vue'
 
 const mapConfig = {
@@ -10,19 +10,20 @@ const mapConfig = {
     imageAspectRatio: 4096 / 2865
 }
 
-const busses = ref<BusPosition[]>()
+const busses = ref<BusInfo[]>()
 
 async function loadBusses() {
     try {
         const data = await fetch('./data.json')
 
-        busses.value = (await data.json()).positions as BusPosition[]
+        busses.value = (await data.json()).busses as BusInfo[]
     } catch (e) {
         alert('Fetching bus information failed. Try again later')
     }
+
+    setTimeout(loadBusses, 5000)
 }
 loadBusses()
-setInterval(loadBusses, cachedVehiclePositionsExpiryTimeMs)
 
 // https://stackoverflow.com/questions/2103924/mercator-longitude-and-latitude-calculations-to-x-and-y-on-a-cropped-map-of-the
 function convertGeoToPixel(
@@ -48,10 +49,10 @@ function convertGeoToPixel(
     return {x, y} // the pixel x,y value of this point on the map image
 }
 
-function getStyle(position: BusPosition) {
+function getStyle(bus: BusInfo) {
     const relativeBusPosition = convertGeoToPixel(
-        position.latitude,
-        position.longitude,
+        bus.position.latitude,
+        bus.position.longitude,
         document.documentElement.clientHeight * mapConfig.imageAspectRatio,
         document.documentElement.clientHeight,
         mapConfig.leftEdgeLongitude,
@@ -59,7 +60,7 @@ function getStyle(position: BusPosition) {
         mapConfig.bottomEdgeLongitude
     )
 
-    let rotation = position.bearing
+    let rotation = bus.position.bearing
 
     let flipped = false
 
@@ -85,7 +86,12 @@ function getStyle(position: BusPosition) {
             class="bus"
             :style="getStyle(bus)"
         >
-            <img :src="busImage.src">
+            <BusIcon 
+                :color="bus.color"
+            />
+            <span
+                class="name"
+            >{{ bus.code }}</span>
         </div>  
     </div>  
 </template>
@@ -93,14 +99,26 @@ function getStyle(position: BusPosition) {
 <style lang="scss" scoped>
 .bus {
     position: absolute;
-    height: 1px;
-    width: 1px;
+    width: 32px;
+    height: 32px;
+    transform-origin: center;
+    transform: translate(-16px, -16px);
+    display: flex;
+    flex-direction: column;
 
     img {
         width: 100%;
-        transform: translate(-16px, -20px);
-        width: 32px;
-        height: 32px;
+        margin-top: -4px;
+    }
+
+    .name {
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: -3px;
+        width: 100%;
+        text-align: center;
+        font-size: 8px;
+        font-weight: bold;
+        font-family: sans-serif;
     }
 }
 </style>
