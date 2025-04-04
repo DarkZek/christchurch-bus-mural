@@ -71,8 +71,8 @@ function getStyle(bus: BusInfo) {
     // }
     
     return {
-        top: `${relativeBusPosition.y * 1.0}px`,
-        left: `${relativeBusPosition.x * 1.0}px`,
+        top: `${relativeBusPosition.y - 16}px`, // Offset by 16 to center bus on point
+        left: `${relativeBusPosition.x - 16}px`,
         rotate: `${rotation + 90}deg`,
         scale: `${flipped ? -1 : 1} 1`
     }
